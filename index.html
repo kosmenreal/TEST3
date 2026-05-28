@@ -1,491 +1,461 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0f172a">
-  <title>Crypto ATR Dashboard</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leverage Calculator 2.0</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #1a1a2e;
+    --surface: #16213e;
+    --panel: #0f3460;
+    --green-bg: #1a2e1a;
+    --green-border: #4caf50;
+    --green-text: #81c784;
+    --orange-bg: #2e1a0a;
+    --orange-border: #ff8c00;
+    --orange-text: #ffb74d;
+    --purple-bg: #1e1a2e;
+    --purple-border: #7c4dff;
+    --purple-text: #b39ddb;
+    --label-color: #8892a4;
+    --text: #e8eaf6;
+    --muted: #546e7a;
+    --accent: #00e5ff;
+    --divider: #1e3a5f;
+  }
 
-  <style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    body {
-      background: #0f172a;
-      color: white;
-      font-family: Arial, sans-serif;
-      padding: 40px;
-      margin: 0;
-    }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    padding: 32px 20px;
+    background-image: 
+      radial-gradient(ellipse at 20% 10%, rgba(0, 229, 255, 0.04) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 90%, rgba(124, 77, 255, 0.04) 0%, transparent 50%);
+  }
 
-    h1 {
-      text-align: center;
-      margin-bottom: 40px;
-      font-size: 42px;
-    }
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+  }
 
-    .calculator {
-      background: #1e293b;
-      padding: 24px;
-      border-radius: 18px;
-      margin-bottom: 40px;
-    }
+  .header {
+    text-align: center;
+    margin-bottom: 36px;
+  }
 
-    .calc-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
-      gap: 18px;
-    }
+  .header h1 {
+    font-family: 'Space Mono', monospace;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
 
-    .input-group {
-      display: flex;
-      flex-direction: column;
-    }
+  .header p {
+    color: var(--muted);
+    font-size: 0.8rem;
+    margin-top: 6px;
+    letter-spacing: 0.05em;
+    font-family: 'Space Mono', monospace;
+  }
 
-    label {
-      margin-bottom: 8px;
-      font-size: 14px;
-      opacity: 0.8;
-    }
+  .legend {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
 
-    input, select {
-      padding: 12px;
-      border-radius: 10px;
-      border: none;
-      background: #334155;
-      color: white;
-      font-size: 16px;
-    }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.75rem;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+  }
 
-    .results {
-      margin-top: 30px;
-      font-size: 20px;
-    }
+  .legend-dot {
+    width: 10px; height: 10px;
+    border-radius: 2px;
+  }
 
-    .result {
-      margin: 12px 0;
-    }
+  .dot-green { background: var(--green-border); }
+  .dot-orange { background: var(--orange-border); }
 
-    .value {
-      color: #38bdf8;
-      font-weight: bold;
-    }
+  .section {
+    background: var(--surface);
+    border: 1px solid var(--divider);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 16px;
+  }
 
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit,minmax(280px,1fr));
-      gap: 24px;
-    }
+  .section-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 18px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--divider);
+  }
 
-    .card {
-      background: #1e293b;
-      border-radius: 18px;
-      padding: 24px;
-    }
+  .grid {
+    display: grid;
+    gap: 14px;
+  }
 
-    .pair {
-      font-size: 30px;
-      font-weight: bold;
-      margin-bottom: 20px;
-    }
+  .grid-2 { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .grid-4 { grid-template-columns: repeat(4, 1fr); }
+  .grid-5 { grid-template-columns: repeat(5, 1fr); }
 
-    .row {
-      margin: 14px 0;
-      font-size: 20px;
-    }
+  @media (max-width: 600px) {
+    .grid-3, .grid-4, .grid-5 { grid-template-columns: repeat(2, 1fr); }
+  }
 
-    .updated {
-      margin-top: 20px;
-      font-size: 12px;
-      opacity: 0.7;
-    }
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
 
-  </style>
+  .field label {
+    font-size: 0.67rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--label-color);
+    font-family: 'Space Mono', monospace;
+    line-height: 1.3;
+  }
+
+  /* Green = inputs */
+  .input-field input {
+    background: var(--green-bg);
+    border: 1.5px solid var(--green-border);
+    border-radius: 7px;
+    color: var(--green-text);
+    font-family: 'Space Mono', monospace;
+    font-size: 1rem;
+    font-weight: 700;
+    padding: 10px 12px;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .input-field input:focus {
+    border-color: #66bb6a;
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.15);
+  }
+
+  /* Orange = outputs */
+  .output-field .value-box {
+    background: var(--orange-bg);
+    border: 1.5px solid var(--orange-border);
+    border-radius: 7px;
+    color: var(--orange-text);
+    font-family: 'Space Mono', monospace;
+    font-size: 1rem;
+    font-weight: 700;
+    padding: 10px 12px;
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+  }
+
+  /* Purple = editable intermediate params */
+  .param-field input {
+    background: var(--purple-bg);
+    border: 1.5px solid var(--purple-border);
+    border-radius: 7px;
+    color: var(--purple-text);
+    font-family: 'Space Mono', monospace;
+    font-size: 1rem;
+    font-weight: 700;
+    padding: 10px 12px;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .param-field input:focus {
+    border-color: #9c6fff;
+    box-shadow: 0 0 0 3px rgba(124, 77, 255, 0.15);
+  }
+
+  .note {
+    font-size: 0.7rem;
+    color: var(--muted);
+    font-style: italic;
+    line-height: 1.4;
+    margin-top: 2px;
+  }
+
+  .section-accent {
+    border-left: 3px solid var(--accent);
+  }
+
+  .highlight-box {
+    background: rgba(0, 229, 255, 0.04);
+    border: 1px solid rgba(0, 229, 255, 0.2);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-top: 16px;
+  }
+
+  .highlight-box .big-value {
+    font-family: 'Space Mono', monospace;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: -0.02em;
+  }
+
+  .highlight-box .big-label {
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-family: 'Space Mono', monospace;
+    margin-top: 4px;
+  }
+
+  .error-text {
+    color: #ef5350;
+    font-size: 0.85rem;
+  }
+
+  .arrow-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--muted);
+    font-size: 0.7rem;
+    font-family: 'Space Mono', monospace;
+    margin-bottom: 14px;
+    background: rgba(255,255,255,0.03);
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--divider);
+    line-height: 1.4;
+  }
+</style>
 </head>
-
 <body>
+<div class="container">
 
-<h1>BTC & SOL ATR Dashboard</h1>
-
-<!-- CALCULATOR -->
-
-<div class="calculator">
-
-  <h2>Risk Calculator</h2>
-
-  <div class="calc-grid">
-
-    <div class="input-group">
-      <label>ENTRY PRICE (D3)</label>
-      <input type="number" id="entryPrice" step="0.01">
-    </div>
-
-    <div class="input-group">
-      <label>STOP LOSS (E3)</label>
-      <input type="number" id="stopLoss" step="0.01">
-    </div>
-
-    <div class="input-group">
-      <label>PORTFOLIO (B3)</label>
-      <input type="number" id="portfolio" value="10">
-    </div>
-
-    <div class="input-group">
-      <label>RISK $ (C3)</label>
-      <input type="number" id="risk" value="1">
-    </div>
-
-    <div class="input-group">
-
-      <label>ATR SOURCE (G4)</label>
-
-      <select id="atrSource">
-
-        <option value="btc1h">
-          1H BTC ATR
-        </option>
-
-        <option value="btc4h">
-          4H BTC ATR
-        </option>
-
-        <option value="sol1h">
-          1H SOL ATR
-        </option>
-
-        <option value="sol4h">
-          4H SOL ATR
-        </option>
-
-      </select>
-
-    </div>
-
+  <div class="header">
+    <h1>⚡ Leverage Calculator 2.0</h1>
+    <p>Position sizing &amp; dynamic stop loss adjuster</p>
   </div>
 
-  <div class="results">
-
-    <div class="result">
-      Stop Loss With Slippage:
-      <span class="value" id="slippageResult">
-        -
-      </span>
-    </div>
-
-    <div class="result">
-      Amount Of Coin:
-      <span class="value" id="coinAmount">
-        -
-      </span>
-    </div>
-
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot dot-green"></div> Input (editable)</div>
+    <div class="legend-item"><div class="legend-dot dot-orange"></div> Calculated output</div>
   </div>
 
-</div>
-
-<!-- ATR DASHBOARD -->
-
-<div class="grid">
-
-  <!-- BTC -->
-
-  <div class="card">
-
-    <div class="pair">BTCUSDT</div>
-
-    <div class="row">
-      1H ATR:
-      <span class="value" id="btc1h">
-        Loading...
-      </span>
+  <!-- Section 1: Primary Inputs -->
+  <div class="section">
+    <div class="section-title">📥 Primary Inputs</div>
+    <div class="grid grid-5">
+      <div class="field input-field">
+        <label>Portfolio</label>
+        <input type="number" id="portfolio" value="10" step="any" oninput="calc()">
+      </div>
+      <div class="field input-field">
+        <label>Risk %</label>
+        <input type="number" id="risk" value="1" step="any" oninput="calc()">
+      </div>
+      <div class="field input-field">
+        <label>Entry Price</label>
+        <input type="number" id="entry" value="100" step="any" oninput="calc()">
+      </div>
+      <div class="field input-field">
+        <label>Stop Loss Price</label>
+        <input type="number" id="stopLoss" value="99" step="any" oninput="calc()">
+      </div>
+      <div class="field input-field">
+        <label>Take Profit Price</label>
+        <input type="number" id="takeProfit" value="110" step="any" oninput="calc()">
+      </div>
     </div>
-
-    <div class="row">
-      4H ATR:
-      <span class="value" id="btc4h">
-        Loading...
-      </span>
-    </div>
-
-    <div class="updated" id="btcUpdated"></div>
-
   </div>
 
-  <!-- SOL -->
+  <!-- Section 2: Core Outputs -->
+  <div class="section">
+    <div class="section-title">📊 Position Sizing</div>
+    <div class="grid grid-3">
+      <div class="field output-field">
+        <label>Amount of Coin</label>
+        <div class="value-box" id="amountCoin">—</div>
+      </div>
+      <div class="field output-field">
+        <label>Rounded Min Leverage</label>
+        <div class="value-box" id="roundedLeverage">—</div>
+      </div>
+      <div class="field output-field">
+        <label>Adjusted Stop Loss</label>
+        <div class="value-box" id="adjStopLoss">—</div>
+      </div>
+    </div>
+    <div class="grid grid-3" style="margin-top:14px">
+      <div class="field output-field">
+        <label>Notional / Position Size</label>
+        <div class="value-box" id="notional">—</div>
+      </div>
+      <div class="field output-field">
+        <label>Leverage Min</label>
+        <div class="value-box" id="leverageMin">—</div>
+      </div>
+      <div class="field output-field">
+        <label>Initial Margin (at min lev)</label>
+        <div class="value-box" id="initMargin">—</div>
+      </div>
+    </div>
+    <div class="highlight-box" style="margin-top:14px;display:flex;gap:40px;flex-wrap:wrap;">
+      <div>
+        <div class="big-value" id="initMargin20x">—</div>
+        <div class="big-label">Initial Margin @ 20x Fixed</div>
+      </div>
+      <div>
+        <div class="big-value" id="expectedLoss">—</div>
+        <div class="big-label">Expected Loss (live sheet ratio)</div>
+      </div>
+    </div>
+  </div>
 
-  <div class="card">
+  <!-- Section 3: SL Adjustment Internals (read-only) -->
+  <div class="section section-accent">
+    <div class="section-title">🔧 Stop Loss Adjustment Internals</div>
 
-    <div class="pair">SOLUSDT</div>
-
-    <div class="row">
-      1H ATR:
-      <span class="value" id="sol1h">
-        Loading...
-      </span>
+    <div class="arrow-label">
+      ℹ️ The stop loss is dynamically adjusted based on position size. Larger positions → SL moves closer to entry. Range: 1 to 10⁶.
     </div>
 
-    <div class="row">
-      4H ATR:
-      <span class="value" id="sol4h">
-        Loading...
-      </span>
+    <div class="grid grid-3">
+      <div class="field output-field">
+        <label>Notional Size (0–1 scale)</label>
+        <div class="value-box" id="notionalNorm">—</div>
+        <span class="note">Log-normalized between 1 and 10⁶</span>
+      </div>
+      <div class="field output-field">
+        <label>Reversed &amp; Powered ×4</label>
+        <div class="value-box" id="reversed">—</div>
+        <span class="note">(1/norm)^4</span>
+      </div>
+      <div class="field output-field">
+        <label>SL Adjustment Factor</label>
+        <div class="value-box" id="f19">—</div>
+        <span class="note">(reversed / 100) × 2</span>
+      </div>
     </div>
-
-    <div class="updated" id="solUpdated"></div>
-
   </div>
 
 </div>
 
 <script>
-
-let atrValues = {};
-
-async function fetchCandles(symbol, interval) {
-
-  const pairMap = {
-    BTCUSDT: "XBTUSDT",
-    SOLUSDT: "SOLUSD"
-  };
-
-  const intervalMap = {
-    "1h": 60,
-    "4h": 240
-  };
-
-  const pair = pairMap[symbol];
-  const tf = intervalMap[interval];
-
-  const url =
-    `https://api.kraken.com/0/public/OHLC?pair=${pair}&interval=${tf}`;
-
-  const response = await fetch(url);
-
-  if (!response.ok) {
-    throw new Error("API Error");
-  }
-
-  const json = await response.json();
-
-  if (json.error.length > 0) {
-    throw new Error(json.error.join(", "));
-  }
-
-  const resultKey =
-    Object.keys(json.result).find(
-      key => key !== "last"
-    );
-
-  return json.result[resultKey];
+function v(id) {
+  return parseFloat(document.getElementById(id).value) || 0;
 }
 
-function calculateATR(candles, period = 14) {
-
-  let trs = [];
-
-  for (let i = 1; i < candles.length; i++) {
-
-    // Kraken format:
-    // [time, open, high, low, close, vwap, volume, count]
-
-    const high =
-      parseFloat(candles[i][2]);
-
-    const low =
-      parseFloat(candles[i][3]);
-
-    const prevClose =
-      parseFloat(candles[i - 1][4]);
-
-    const tr = Math.max(
-      high - low,
-      Math.abs(high - prevClose),
-      Math.abs(low - prevClose)
-    );
-
-    trs.push(tr);
-  }
-
-  const recentTRs =
-    trs.slice(-period);
-
-  const atr =
-    recentTRs.reduce(
-      (sum, tr) => sum + tr,
-      0
-    ) / period;
-
-  return atr;
+function fmt(n, decimals = 5) {
+  if (!isFinite(n) || isNaN(n)) return '<span class="error-text">ERR</span>';
+  if (Math.abs(n) > 1e10) return '<span class="error-text">ERR</span>';
+  // smart formatting
+  if (Number.isInteger(n) || Math.abs(n) > 1000) return n.toLocaleString('en', {maximumFractionDigits: 2});
+  return +n.toFixed(decimals) + '';
 }
 
-async function updateATR(symbol, interval, elementId) {
-
-  try {
-
-    const candles =
-      await fetchCandles(symbol, interval);
-
-    const atr =
-      calculateATR(candles);
-
-    atrValues[elementId] = atr;
-
-    document.getElementById(elementId)
-      .innerText = atr.toFixed(2);
-
-    calculateRisk();
-
-  } catch (err) {
-
-    console.error(err);
-
-    document.getElementById(elementId)
-      .innerText = "Error";
-  }
+function set(id, val) {
+  document.getElementById(id).innerHTML = fmt(val);
 }
 
-function calculateRisk() {
+function calc() {
+  const portfolio = v('portfolio');
+  const risk      = v('risk');
+  const entry     = v('entry');
+  const sl        = v('stopLoss');
+  const tp        = v('takeProfit');
+  const minRange = 1;
+  const maxRange = 1000000;
 
-  const entry =
-    parseFloat(
-      document.getElementById("entryPrice").value
-    );
+  // C7: Amount of coin = risk / |entry - stopLoss|
+  const amountCoin = risk / Math.abs(entry - sl);
 
-  const stop =
-    parseFloat(
-      document.getElementById("stopLoss").value
-    );
+  // C11: Notional = amountCoin * entry
+  const notional = amountCoin * entry;
 
-  const portfolio =
-    parseFloat(
-      document.getElementById("portfolio").value
-    );
+  // D11 (leverageMin raw, before roundup): notional / portfolio
+  const leverageMinRaw = notional / portfolio;
 
-  // RISK IS NOW DIRECT DOLLAR AMOUNT
+  // D7: Rounded min leverage = ROUNDUP(leverageMinRaw, 0)
+  const roundedLeverage = Math.ceil(leverageMinRaw);
 
-  const riskAmount =
-    parseFloat(
-      document.getElementById("risk").value
-    );
+  // C14: Initial Margin at 20x = notional / 20
+  const initMargin20x = notional / 20;
 
-  const atrKey =
-    document.getElementById("atrSource").value;
+  // E11: Initial Margin = notional / roundedLeverage
+  const initMargin = notional / roundedLeverage;
 
-  const atr =
-    atrValues[atrKey];
-
-  if (
-    !entry ||
-    !stop ||
-    !atr ||
-    !riskAmount
-  ) {
-    return;
+  // C19: (LOG10(notional) - LOG10(maxRange)) / (LOG10(minRange) - LOG10(maxRange))
+  // NOTE: C22=minRange is the "max" endpoint in the formula, C25=maxRange is the "min"
+  let notionalNorm = NaN;
+  if (notional > 0) {
+    notionalNorm = (Math.log10(notional) - Math.log10(maxRange)) / (Math.log10(minRange) - Math.log10(maxRange));
   }
 
-  // STOP LOSS WITH SLIPPAGE
+  // D19: reversed = (1/notionalNorm)^4
+  const reversed = Math.pow(1 / notionalNorm, 4);
 
-  let stopWithSlippage;
+  // F19: SL adjustment factor = (reversed / 100) * 2
+  const f19 = (reversed / 100) * 2;
 
-  if (entry - stop > 0) {
-
-    stopWithSlippage =
-      entry -
-      Math.abs(
-        entry - stop - (atr * 0.1)
-      );
-
+  // E7: Adjusted SL
+  // IF(entry - sl > 0, sl + |entry-sl| * f19, sl - |entry-sl| * f19)
+  let adjSL;
+  if (entry - sl > 0) {
+    adjSL = sl + Math.abs(entry - sl) * f19;
   } else {
-
-    stopWithSlippage =
-      entry +
-      Math.abs(
-        entry - stop + (atr * 0.1)
-      );
+    adjSL = sl - Math.abs(entry - sl) * f19;
   }
 
-  // AMOUNT OF COIN
+  // F7: Expected loss ratio
+  // IF(entry-sl > 0, (entry - adjSL)/(entry - sl), |entry-adjSL|/|entry-sl|)
+  let expectedLoss;
+  if (entry - sl > 0) {
+    expectedLoss = (entry - adjSL) / (entry - sl);
+  } else {
+    expectedLoss = Math.abs(entry - adjSL) / Math.abs(entry - sl);
+  }
 
-  const amountOfCoin =
-    riskAmount /
-    Math.abs(entry - stop);
-
-  document.getElementById("slippageResult")
-    .innerText =
-    stopWithSlippage.toFixed(4);
-
-  document.getElementById("coinAmount")
-    .innerText =
-    amountOfCoin.toFixed(4);
+  // Render outputs
+  set('amountCoin', amountCoin);
+  set('roundedLeverage', roundedLeverage);
+  set('adjStopLoss', adjSL);
+  set('notional', notional);
+  set('leverageMin', leverageMinRaw);
+  set('initMargin', initMargin);
+  document.getElementById('initMargin20x').innerHTML = fmt(initMargin20x, 4);
+  document.getElementById('expectedLoss').innerHTML = fmt(expectedLoss, 6);
+  set('notionalNorm', notionalNorm);
+  set('reversed', reversed);
+  set('f19', f19);
 }
 
-async function loadData() {
-
-  await Promise.all([
-
-    updateATR(
-      "BTCUSDT",
-      "1h",
-      "btc1h"
-    ),
-
-    updateATR(
-      "BTCUSDT",
-      "4h",
-      "btc4h"
-    ),
-
-    updateATR(
-      "SOLUSDT",
-      "1h",
-      "sol1h"
-    ),
-
-    updateATR(
-      "SOLUSDT",
-      "4h",
-      "sol4h"
-    )
-
-  ]);
-
-  const currentTime =
-    new Date().toLocaleTimeString();
-
-  document.getElementById("btcUpdated")
-    .innerText =
-    "Updated: " + currentTime;
-
-  document.getElementById("solUpdated")
-    .innerText =
-    "Updated: " + currentTime;
-}
-
-document.querySelectorAll("input, select")
-  .forEach(el => {
-
-    el.addEventListener(
-      "input",
-      calculateRisk
-    );
-
-  });
-
-loadData();
-
-if ("serviceWorker" in navigator) {
-
-  window.addEventListener("load", () => {
-
-    navigator.serviceWorker.register(
-      "./service-worker.js"
-    );
-
-  });
-
-}
-  
-  
+calc();
 </script>
-
 </body>
 </html>
