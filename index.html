@@ -44,7 +44,6 @@
   }
   @media (max-width: 680px) { .wrap { grid-template-columns: 1fr; } }
   aside { order: -1; }
-  @media (max-width: 680px) { aside { order: 1; } }
 
   .col { display: flex; flex-direction: column; gap: 12px; }
   .row { display: grid; gap: 12px; }
@@ -90,15 +89,29 @@
   .field.big { height: 52px; }
   .field.big input, .field.big .value { font-size: 18px; }
   @media (max-width: 680px) {
-    .field.big { height: 58px; }
-    .field.big input, .field.big .value { font-size: 22px; }
-    .row.two .field.big {
+    body { padding: 20px 14px 40px; }
+    .field input, .field select { font-size: 16px; }
+    .field.big {
       display: grid; grid-template-columns: 1fr auto; grid-template-areas: "l l" "v u";
-      align-content: center; row-gap: 1px; height: 68px;
+      align-content: center; align-items: end; row-gap: 4px;
+      height: auto; min-height: 92px; padding: 12px 16px;
     }
-    .row.two .field.big > .label { grid-area: l; font-size: 12.5px; }
-    .row.two .field.big > input, .row.two .field.big > .value { grid-area: v; text-align: left; }
-    .row.two .field.big > .unit { grid-area: u; align-self: end; font-size: 18px; }
+    .field.big > .label { grid-area: l; font-size: 16px; align-self: start; }
+    .field.big > input, .field.big > .value { grid-area: v; text-align: left; font-size: 32px; line-height: 1.15; }
+    .field.big > .unit { grid-area: u; font-size: 26px; line-height: 1.15; }
+    .field.big > label { grid-area: u; align-self: end; }
+    .field.big select { font-size: 24px; }
+    .field.big .chev { width: 14px; height: 14px; }
+  }
+
+  /* Phone: order is top fields, account, copy bar, then the stats far below */
+  @media (max-width: 680px) {
+    .wrap { display: flex; flex-direction: column; gap: 22px; }
+    .ticket { display: contents; }
+    .topgroup { order: 1; gap: 14px; }
+    aside { order: 2; }
+    .copybar { order: 3; margin-top: 0; }
+    .stats { order: 4; margin-top: 140px; }
   }
 
   .field.bad { border-color: var(--bad); }
@@ -157,7 +170,8 @@
 <main class="wrap">
 
   <!-- Order ticket -->
-  <section class="col" aria-label="Order">
+  <section class="col ticket" aria-label="Order">
+  <div class="col topgroup">
     <label class="field g big">
       <span class="label">Entry price (USDC)</span>
       <input id="entry" inputmode="decimal" autocomplete="off" placeholder="0">
@@ -198,6 +212,7 @@
     </div>
 
     <div class="note" id="note" role="status"></div>
+  </div>
 
 
     <div class="copybar">
