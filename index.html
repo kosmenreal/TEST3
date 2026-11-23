@@ -1,459 +1,412 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Leverage Calculator 2.0</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Position size calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #1a1a2e;
-    --surface: #16213e;
-    --panel: #0f3460;
-    --green-bg: #1a2e1a;
-    --green-border: #4caf50;
-    --green-text: #81c784;
-    --orange-bg: #2e1a0a;
-    --orange-border: #ff8c00;
-    --orange-text: #ffb74d;
-    --purple-bg: #1e1a2e;
-    --purple-border: #7c4dff;
-    --purple-text: #b39ddb;
-    --label-color: #8892a4;
-    --text: #e8eaf6;
-    --muted: #546e7a;
-    --accent: #00e5ff;
-    --divider: #1e3a5f;
+    --bg: #0b1418;
+    --panel: #0f1a1f;
+    --field: #0f1a1f;
+    --line: #273238;
+    --line-focus: #50d2c1;
+    --text: #ffffff;
+    --muted: #8f9b9e;
+    --accent: #50d2c1;
+    --bad: #ed7088;
+    --green: #5fd38a;
+    --orange: #f0a04b;
+    --good: #50d2c1;
+    color-scheme: dark;
   }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
   body {
     background: var(--bg);
     color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    min-height: 100vh;
-    padding: 32px 20px;
-    background-image: 
-      radial-gradient(ellipse at 20% 10%, rgba(0, 229, 255, 0.04) 0%, transparent 50%),
-      radial-gradient(ellipse at 80% 90%, rgba(124, 77, 255, 0.04) 0%, transparent 50%);
-  }
-
-  .container {
-    max-width: 860px;
-    margin: 0 auto;
-  }
-
-  .header {
-    text-align: center;
-    margin-bottom: 36px;
-  }
-
-  .header h1 {
-    font-family: 'Space Mono', monospace;
-    font-size: 1.5rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    color: var(--accent);
-    text-transform: uppercase;
-  }
-
-  .header p {
-    color: var(--muted);
-    font-size: 0.8rem;
-    margin-top: 6px;
-    letter-spacing: 0.05em;
-    font-family: 'Space Mono', monospace;
-  }
-
-  .legend {
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 14px;
     display: flex;
-    gap: 20px;
     justify-content: center;
-    margin-bottom: 28px;
-    flex-wrap: wrap;
+    padding: 40px 16px;
   }
-
-  .legend-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.75rem;
-    color: var(--muted);
-    font-family: 'Space Mono', monospace;
-  }
-
-  .legend-dot {
-    width: 10px; height: 10px;
-    border-radius: 2px;
-  }
-
-  .dot-green { background: var(--green-border); }
-  .dot-orange { background: var(--orange-border); }
-
-  .section {
-    background: var(--surface);
-    border: 1px solid var(--divider);
-    border-radius: 12px;
-    padding: 24px;
-    margin-bottom: 16px;
-  }
-
-  .section-title {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.65rem;
-    font-weight: 700;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 18px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid var(--divider);
-  }
-
-  .grid {
+  .wrap {
     display: grid;
-    gap: 14px;
+    grid-template-columns: minmax(220px, 260px) minmax(300px, 440px);
+    gap: 28px;
+    align-items: start;
+    width: 100%;
+    max-width: 740px;
   }
+  @media (max-width: 680px) { .wrap { grid-template-columns: 1fr; } }
+  aside { order: -1; }
+  @media (max-width: 680px) { aside { order: 1; } }
 
-  .grid-2 { grid-template-columns: repeat(2, 1fr); }
-  .grid-3 { grid-template-columns: repeat(3, 1fr); }
-  .grid-4 { grid-template-columns: repeat(4, 1fr); }
-  .grid-5 { grid-template-columns: repeat(5, 1fr); }
-
-  @media (max-width: 600px) {
-    .grid-3, .grid-4, .grid-5 { grid-template-columns: repeat(2, 1fr); }
-  }
+  .col { display: flex; flex-direction: column; gap: 12px; }
+  .row { display: grid; gap: 12px; }
+  .row.two { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 
   .field {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    height: 44px; padding: 0 14px;
+    background: var(--field);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    cursor: text;
+    transition: border-color .12s;
   }
+  .field:focus-within { border-color: var(--line-focus); }
+  .field > span.label { color: var(--muted); white-space: nowrap; }
+  .field input, .field select {
+    flex: 1; min-width: 0;
+    background: transparent; border: 0; outline: 0;
+    color: var(--text); font: inherit; font-weight: 600;
+    text-align: right;
+  }
+  .field input::placeholder { color: #4b595d; font-weight: 400; }
+  .field.out { cursor: default; }
+  .field.out .value { flex: 1; text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .field.out .value.empty { color: #4b595d; font-weight: 400; }
+  .field.copyable { cursor: copy; }
+  .field.copyable:hover { border-color: #3a484e; }
+  .field .unit { color: var(--text); font-weight: 600; }
+  .field select { flex: 0 0 auto; width: auto; text-align: right; cursor: pointer; appearance: none; padding-right: 2px; }
+  .field select option { background: var(--panel); }
+  .chev { width: 10px; height: 10px; stroke: var(--muted); fill: none; stroke-width: 1.6; flex: none; }
+  .tag { color: var(--accent); font-weight: 500; font-size: 13px; }
 
-  .field label {
-    font-size: 0.67rem;
-    font-weight: 500;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    color: var(--label-color);
-    font-family: 'Space Mono', monospace;
-    line-height: 1.3;
-  }
+  .field.g { background: rgba(95,211,138,.07); border-color: rgba(95,211,138,.38); }
+  .field.g:focus-within { border-color: var(--green); }
+  .field.g > span.label { color: #8fc9a5; }
+  .field.o { background: rgba(240,160,75,.07); border-color: rgba(240,160,75,.40); }
+  .field.o > span.label { color: #d4a874; }
+  .field.o .value:not(.empty) { color: var(--orange); }
+  .field.o.copyable:hover { border-color: var(--orange); }
 
-  /* Green = inputs */
-  .input-field input {
-    background: var(--green-bg);
-    border: 1.5px solid var(--green-border);
-    border-radius: 7px;
-    color: var(--green-text);
-    font-family: 'Space Mono', monospace;
-    font-size: 1rem;
-    font-weight: 700;
-    padding: 10px 12px;
-    width: 100%;
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-  }
+  .field.bad { border-color: var(--bad); }
+  .field.bad > span.label { color: var(--bad); }
+  .field.g.bad { background: rgba(237,112,136,.07); border-color: var(--bad); }
 
-  .input-field input:focus {
-    border-color: #66bb6a;
-    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.15);
-  }
+  .gain { color: var(--good) !important; }
+  .loss { color: var(--bad) !important; }
 
-  /* Orange = outputs */
-  .output-field .value-box {
-    background: var(--orange-bg);
-    border: 1.5px solid var(--orange-border);
-    border-radius: 7px;
-    color: var(--orange-text);
-    font-family: 'Space Mono', monospace;
-    font-size: 1rem;
-    font-weight: 700;
-    padding: 10px 12px;
-    min-height: 42px;
-    display: flex;
-    align-items: center;
+  .stats {
+    margin-top: 6px;
+    border-top: 1px solid var(--line);
+    padding-top: 14px;
+    display: grid; gap: 9px;
   }
+  .stat { display: flex; justify-content: space-between; color: var(--muted); }
+  .stat b { color: var(--text); font-weight: 500; font-variant-numeric: tabular-nums; }
 
-  /* Purple = editable intermediate params */
-  .param-field input {
-    background: var(--purple-bg);
-    border: 1.5px solid var(--purple-border);
-    border-radius: 7px;
-    color: var(--purple-text);
-    font-family: 'Space Mono', monospace;
-    font-size: 1rem;
-    font-weight: 700;
-    padding: 10px 12px;
-    width: 100%;
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
+  .copybar { margin-top: 6px; border-top: 1px solid var(--line); padding-top: 14px; display: grid; gap: 12px; }
+  .copybar .foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .btn {
+    height: 34px; padding: 0 14px; border-radius: 8px;
+    border: 1px solid var(--accent); background: transparent; color: var(--accent);
+    font: inherit; font-weight: 600; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 8px;
   }
-
-  .param-field input:focus {
-    border-color: #9c6fff;
-    box-shadow: 0 0 0 3px rgba(124, 77, 255, 0.15);
+  .btn:hover:not(:disabled) { background: rgba(80,210,193,.1); }
+  .btn:disabled { opacity: .4; cursor: not-allowed; }
+  .btn svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.6; }
+  .combo { position: relative; }
+  .chevbtn { background: none; border: 0; padding: 4px; margin-right: -4px; cursor: pointer; display: flex; }
+  .menu {
+    position: absolute; z-index: 5; left: 0; right: 0; top: calc(100% + 4px);
+    margin: 0; padding: 4px; list-style: none;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.45);
   }
-
-  .note {
-    font-size: 0.7rem;
-    color: var(--muted);
-    font-style: italic;
-    line-height: 1.4;
-    margin-top: 2px;
+  .menu[hidden] { display: none; }
+  .menu li { padding: 9px 10px; border-radius: 6px; cursor: pointer; white-space: nowrap; }
+  .menu li:hover, .menu li:focus { background: rgba(80,210,193,.12); outline: 0; }
+  .side-title { color: var(--muted); font-size: 13px; padding: 0 2px; }
+  .hint { color: var(--muted); font-size: 12.5px; padding: 0 2px; line-height: 1.5; }
+  .note { min-height: 18px; color: var(--bad); font-size: 12.5px; padding: 0 2px; }
+  .toast {
+    position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%) translateY(8px);
+    background: var(--accent); color: #04211d; font-weight: 600;
+    padding: 8px 14px; border-radius: 8px; opacity: 0; pointer-events: none;
+    transition: opacity .15s, transform .15s;
   }
-
-  .section-accent {
-    border-left: 3px solid var(--accent);
-  }
-
-  .highlight-box {
-    background: rgba(0, 229, 255, 0.04);
-    border: 1px solid rgba(0, 229, 255, 0.2);
-    border-radius: 10px;
-    padding: 18px 20px;
-    margin-top: 16px;
-  }
-
-  .highlight-box .big-value {
-    font-family: 'Space Mono', monospace;
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--accent);
-    letter-spacing: -0.02em;
-  }
-
-  .highlight-box .big-label {
-    font-size: 0.7rem;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    font-family: 'Space Mono', monospace;
-    margin-top: 4px;
-  }
-
-  .error-text {
-    color: #ef5350;
-    font-size: 0.85rem;
-  }
-
-  .arrow-label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: var(--muted);
-    font-size: 0.7rem;
-    font-family: 'Space Mono', monospace;
-    margin-bottom: 14px;
-    background: rgba(255,255,255,0.03);
-    padding: 8px 12px;
-    border-radius: 6px;
-    border: 1px solid var(--divider);
-    line-height: 1.4;
-  }
+  .toast.show { opacity: 1; transform: translateX(-50%); }
+  @media (prefers-reduced-motion: reduce) { .toast, .field { transition: none; } }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 </style>
 </head>
 <body>
-<div class="container">
+<main class="wrap">
 
-  <div class="header">
-    <h1>⚡ Leverage Calculator 2.0</h1>
-    <p>Position sizing &amp; dynamic stop loss adjuster</p>
-  </div>
+  <!-- Order ticket -->
+  <section class="col" aria-label="Order">
+    <label class="field g">
+      <span class="label">Entry price (USDC)</span>
+      <input id="entry" inputmode="decimal" autocomplete="off" placeholder="0">
+    </label>
 
-  <div class="legend">
-    <div class="legend-item"><div class="legend-dot dot-green"></div> Input (editable)</div>
-    <div class="legend-item"><div class="legend-dot dot-orange"></div> Calculated output</div>
-  </div>
-
-  <!-- Section 1: Primary Inputs -->
-  <div class="section">
-    <div class="section-title">📥 Primary Inputs</div>
-    <div class="grid grid-5">
-      <div class="field input-field">
-        <label>Portfolio</label>
-        <input type="number" id="portfolio" value="10" step="any" oninput="calc()">
-      </div>
-      <div class="field input-field">
-        <label>Risk %</label>
-        <input type="number" id="risk" value="1" step="any" oninput="calc()">
-      </div>
-      <div class="field input-field">
-        <label>Entry Price</label>
-        <input type="number" id="entry" value="100" step="any" oninput="calc()">
-      </div>
-      <div class="field input-field">
-        <label>Stop Loss Price</label>
-        <input type="number" id="stopLoss" value="99" step="any" oninput="calc()">
-      </div>
-      <div class="field input-field">
-        <label>Take Profit Price</label>
-        <input type="number" id="takeProfit" value="110" step="any" oninput="calc()">
-      </div>
-    </div>
-  </div>
-
-  <!-- Section 2: Core Outputs -->
-  <div class="section">
-    <div class="section-title">📊 Position Sizing</div>
-    <div class="grid grid-3">
-      <div class="field output-field">
-        <label>Amount of Coin</label>
-        <div class="value-box" id="amountCoin">—</div>
-      </div>
-      <div class="field output-field">
-        <label>Rounded Min Leverage</label>
-        <div class="value-box" id="roundedLeverage">—</div>
-      </div>
-      <div class="field output-field">
-        <label>Adjusted Stop Loss</label>
-        <div class="value-box" id="adjStopLoss">—</div>
-      </div>
-    </div>
-    <div class="grid grid-3" style="margin-top:14px">
-      <div class="field output-field">
-        <label>Notional / Position Size</label>
-        <div class="value-box" id="notional">—</div>
-      </div>
-      <div class="field output-field">
-        <label>Leverage Min</label>
-        <div class="value-box" id="leverageMin">—</div>
-      </div>
-      <div class="field output-field">
-        <label>Initial Margin (at min lev)</label>
-        <div class="value-box" id="initMargin">—</div>
-      </div>
-    </div>
-    <div class="highlight-box" style="margin-top:14px;display:flex;gap:40px;flex-wrap:wrap;">
-      <div>
-        <div class="big-value" id="initMargin20x">—</div>
-        <div class="big-label">Initial Margin @ 20x Fixed</div>
-      </div>
-      <div>
-        <div class="big-value" id="expectedLoss">—</div>
-        <div class="big-label">Expected Loss (live sheet ratio)</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Section 3: SL Adjustment Internals (read-only) -->
-  <div class="section section-accent">
-    <div class="section-title">🔧 Stop Loss Adjustment Internals</div>
-
-    <div class="arrow-label">
-      ℹ️ The stop loss is dynamically adjusted based on position size. Larger positions → SL moves closer to entry. Range: 1 to 10⁶.
+    <div class="field out copyable o" id="sizeBox" title="Click to copy">
+      <span class="label">Size</span>
+      <span class="value empty" id="size">–</span>
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+        <select id="coin" aria-label="Coin">
+          <option>BTC</option><option>ETH</option><option>SOL</option>
+        </select>
+        <svg class="chev" viewBox="0 0 10 10"><path d="M1 3l4 4 4-4"/></svg>
+      </label>
     </div>
 
-    <div class="grid grid-3">
-      <div class="field output-field">
-        <label>Notional Size (0–1 scale)</label>
-        <div class="value-box" id="notionalNorm">—</div>
-        <span class="note">Log-normalized between 1 and 10⁶</span>
-      </div>
-      <div class="field output-field">
-        <label>Reversed &amp; Powered ×4</label>
-        <div class="value-box" id="reversed">—</div>
-        <span class="note">(1/norm)^4</span>
-      </div>
-      <div class="field output-field">
-        <label>SL Adjustment Factor</label>
-        <div class="value-box" id="f19">—</div>
-        <span class="note">(reversed / 100) × 2</span>
+    <div class="row two">
+      <label class="field g" id="tpBox">
+        <span class="label">TP price</span>
+        <input id="tp" inputmode="decimal" autocomplete="off" placeholder="">
+      </label>
+      <div class="field out">
+        <span class="label">Gain</span>
+        <span class="value empty" id="gain">–</span>
+        <span class="unit">%</span>
       </div>
     </div>
-  </div>
 
-</div>
+    <div class="row two">
+      <div class="field out copyable o" id="adjBox" title="Click to copy">
+        <span class="label">Adjusted SL</span>
+        <span class="value empty" id="adj">–</span>
+      </div>
+      <label class="field g" id="slBox">
+        <span class="label">SL price</span>
+        <input id="sl" inputmode="decimal" autocomplete="off" placeholder="">
+      </label>
+    </div>
+
+    <div class="note" id="note" role="status"></div>
+
+    <div class="stats">
+      <div class="stat"><span>Expected loss at adjusted SL</span><b id="expLoss">–</b></div>
+      <div class="stat"><span>Position size (notional)</span><b id="notional">–</b></div>
+      <div class="stat"><span>Min. leverage for portfolio</span><b id="lev">–</b></div>
+      <div class="stat"><span>Initial margin at that leverage</span><b id="margin">–</b></div>
+    </div>
+
+    <div class="copybar">
+      <div class="row two">
+        <label class="field">
+          <span class="label">Coin</span>
+          <input id="coinText" autocomplete="off" aria-label="Coin text for the copied row">
+        </label>
+        <div class="field combo" id="sysBox">
+          <span class="label">System</span>
+          <input id="system" autocomplete="off" value="5. BTC 1H UND OVR" aria-label="System text for the copied row">
+          <button type="button" class="chevbtn" id="sysToggle" aria-label="Choose a system" aria-haspopup="listbox" aria-expanded="false">
+            <svg class="chev" viewBox="0 0 10 10"><path d="M1 3l4 4 4-4"/></svg>
+          </button>
+          <ul class="menu" id="sysMenu" role="listbox" hidden>
+            <li role="option" tabindex="0">5. BTC 1H UND OVR</li>
+            <li role="option" tabindex="0">7. ETH 1h MEAN REV</li>
+          </ul>
+        </div>
+      </div>
+      <div class="foot">
+        <button class="btn" id="copyRow" type="button" disabled>
+          <svg viewBox="0 0 14 14"><rect x="4.5" y="4.5" width="8" height="8" rx="1.5"/><path d="M9.5 2.5v-.2a.8.8 0 0 0-.8-.8H2.3a.8.8 0 0 0-.8.8v6.4a.8.8 0 0 0 .8.8h.2"/></svg>
+          Copy row
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Side panel -->
+  <aside class="col" aria-label="Account">
+    <div class="side-title">Account</div>
+    <label class="field">
+      <span class="label">Portfolio</span>
+      <input id="portfolio" inputmode="decimal" autocomplete="off" placeholder="0" value="905">
+    </label>
+    <label class="field">
+      <span class="label">Risk</span>
+      <input id="risk" inputmode="decimal" autocomplete="off" placeholder="0" value="9.05">
+    </label>
+    <div class="hint" id="riskPct">1% of portfolio is 9,05</div>
+  </aside>
+</main>
+<div class="toast" id="toast">Copied</div>
 
 <script>
-function v(id) {
-  return parseFloat(document.getElementById(id).value) || 0;
+const $ = id => document.getElementById(id);
+const num = s => {
+  const v = parseFloat(String(s).replace(/\s/g, '').replace(',', '.'));
+  return isFinite(v) ? v : NaN;
+};
+const decs = s => { const m = String(s).replace(',', '.').split('.')[1]; return m ? m.length : 0; };
+const fmt = (v, d) => v.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+
+// Same normalisation as the sheet: notional mapped on a log scale between 1 and 1,000,000, reversed.
+const NOTIONAL_MIN = 1, NOTIONAL_MAX = 1e6, SL_FACTOR = 1.6;
+const AMOUNT_DECIMALS = { BTC: 5, ETH: 4, SOL: 2 };
+
+let coinTouched = false, coinTextTouched = false, state = null;
+
+function setOut(id, text, cls) {
+  const el = $(id);
+  el.textContent = text;
+  el.classList.toggle('empty', text === '–');
+  el.classList.remove('gain', 'loss');
+  if (cls) el.classList.add(cls);
 }
 
-function fmt(n, decimals = 5) {
-  if (!isFinite(n) || isNaN(n)) return '<span class="error-text">ERR</span>';
-  if (Math.abs(n) > 1e10) return '<span class="error-text">ERR</span>';
-  // smart formatting
-  if (Number.isInteger(n) || Math.abs(n) > 1000) return n.toLocaleString('en', {maximumFractionDigits: 2});
-  return +n.toFixed(decimals) + '';
-}
-
-function set(id, val) {
-  document.getElementById(id).innerHTML = fmt(val);
+function clearOutputs() {
+  ['size', 'adj', 'gain'].forEach(id => setOut(id, '–'));
+  ['expLoss', 'notional', 'lev', 'margin'].forEach(id => $(id).textContent = '–');
 }
 
 function calc() {
-  const portfolio = v('portfolio');
-  const risk      = v('risk');
-  const entry     = v('entry');
-  const sl        = v('stopLoss');
-  const tp        = v('takeProfit');
-  const minRange = 1;
-  const maxRange = 1000000;
+  const entry = num($('entry').value), sl = num($('sl').value), tp = num($('tp').value);
+  const risk = num($('risk').value), pf = num($('portfolio').value);
+  const note = $('note');
+  note.textContent = '';
+  state = null;
+  ['tpBox', 'slBox'].forEach(i => $(i).classList.remove('bad'));
 
-  // C7: Amount of coin = risk / |entry - stopLoss|
-  const amountCoin = risk / Math.abs(entry - sl);
+  // Auto-pick coin from entry price (like the sheet) until the user picks one
+  if (!coinTouched && entry > 0) $('coin').value = entry < 1000 ? 'SOL' : entry < 30000 ? 'ETH' : 'BTC';
 
-  // C11: Notional = amountCoin * entry
-  const notional = amountCoin * entry;
+  if (!coinTextTouched) $('coinText').value = $('coin').value;
 
-  // D11 (leverageMin raw, before roundup): notional / portfolio
-  const leverageMinRaw = notional / portfolio;
+  $('riskPct').textContent = pf > 0
+    ? '1% of portfolio is ' + String(Number((pf * 0.01).toFixed(4))).replace('.', ',')
+    : '1% of portfolio is –';
 
-  // D7: Rounded min leverage = ROUNDUP(leverageMinRaw, 0)
-  const roundedLeverage = Math.ceil(leverageMinRaw);
+  const long = entry > sl;
 
-  // C14: Initial Margin at 20x = notional / 20
-  const initMargin20x = notional / 20;
+  // Take profit side check + gain
+  if (entry > 0 && tp > 0) {
+    const g = (tp - entry) / entry * 100 * (long ? 1 : -1);
+    setOut('gain', (g >= 0 ? '+' : '') + fmt(g, 2), g >= 0 ? 'gain' : 'loss');
+    if (sl > 0 && g < 0) {
+      $('tpBox').classList.add('bad');
+      note.textContent = long ? 'Take profit should be above entry for a long.' : 'Take profit should be below entry for a short.';
+    }
+  } else setOut('gain', '–');
 
-  // E11: Initial Margin = notional / roundedLeverage
-  const initMargin = notional / roundedLeverage;
-
-  // C19: (LOG10(notional) - LOG10(maxRange)) / (LOG10(minRange) - LOG10(maxRange))
-  // NOTE: C22=minRange is the "max" endpoint in the formula, C25=maxRange is the "min"
-  let notionalNorm = NaN;
-  if (notional > 0) {
-    notionalNorm = (Math.log10(notional) - Math.log10(maxRange)) / (Math.log10(minRange) - Math.log10(maxRange));
+  if (!(entry > 0 && sl > 0 && risk > 0)) { ['size', 'adj'].forEach(id => setOut(id, '–')); clearOutputs2(); return; }
+  if (entry === sl) {
+    $('slBox').classList.add('bad');
+    note.textContent = 'Stop loss can’t equal the entry price.';
+    clearOutputs(); return;
   }
 
-  // D19: reversed = (1/notionalNorm)^4
-  const reversed = Math.pow(1 / notionalNorm, 4);
+  const dist = Math.abs(entry - sl);
+  const amount = risk / dist;                 // amount of coin
+  const notional = amount * entry;            // position size in USDC
+  const dir = Math.sign(entry - sl);          // +1 long, -1 short
 
-  // F19: SL adjustment factor = (reversed / 100) * 2
-  const f19 = (reversed / 100) * 2;
+  const coin = $('coin').value;
+  setOut('size', fmt(amount, AMOUNT_DECIMALS[coin]));
+  $('notional').textContent = fmt(notional, 2) + ' USDC';
 
-  // E7: Adjusted SL
-  // IF(entry - sl > 0, sl + |entry-sl| * f19, sl - |entry-sl| * f19)
-  let adjSL;
-  if (entry - sl > 0) {
-    adjSL = sl + Math.abs(entry - sl) * f19;
+  // Adjusted stop loss
+  let adjVal = null, expRatio = null;
+  const norm = (Math.log10(notional) - Math.log10(NOTIONAL_MAX)) / (Math.log10(NOTIONAL_MIN) - Math.log10(NOTIONAL_MAX));
+  if (!(norm > 0)) {
+    setOut('adj', '–');
+    $('expLoss').textContent = '–';
+    note.textContent = 'Position is 1,000,000 USDC or more – adjusted SL is out of the sheet’s range.';
   } else {
-    adjSL = sl - Math.abs(entry - sl) * f19;
+    const factor = Math.pow(1 / norm, 2) / 100 * SL_FACTOR;
+    const adj = sl + dir * dist * factor;
+    adjVal = adj;
+    const d = Math.min(6, Math.max(2, decs($('sl').value), decs($('entry').value)));
+    setOut('adj', fmt(adj, d));
+    const expected = (entry - adj) / (entry - sl);
+    expRatio = expected;
+    $('expLoss').textContent = fmt(expected * 100, 1) + '% of risk (' + fmt(expected * risk, 2) + ' USDC)';
+    if (factor >= 1 && !note.textContent) note.textContent = 'Adjusted SL has moved past your entry price.';
   }
 
-  // F7: Expected loss ratio
-  // IF(entry-sl > 0, (entry - adjSL)/(entry - sl), |entry-adjSL|/|entry-sl|)
-  let expectedLoss;
-  if (entry - sl > 0) {
-    expectedLoss = (entry - adjSL) / (entry - sl);
-  } else {
-    expectedLoss = Math.abs(entry - adjSL) / Math.abs(entry - sl);
-  }
+  state = { amount, risk, portfolio: pf > 0 ? pf : null, sl, exp: expRatio, adj: adjVal };
 
-  // Render outputs
-  set('amountCoin', amountCoin);
-  set('roundedLeverage', roundedLeverage);
-  set('adjStopLoss', adjSL);
-  set('notional', notional);
-  set('leverageMin', leverageMinRaw);
-  set('initMargin', initMargin);
-  document.getElementById('initMargin20x').innerHTML = fmt(initMargin20x, 4);
-  document.getElementById('expectedLoss').innerHTML = fmt(expectedLoss, 6);
-  set('notionalNorm', notionalNorm);
-  set('reversed', reversed);
-  set('f19', f19);
+  if (pf > 0) {
+    const lev = notional / pf, rounded = Math.ceil(lev);
+    $('lev').textContent = rounded + 'x (' + fmt(lev, 2) + 'x exact)';
+    $('margin').textContent = fmt(notional / rounded, 2) + ' USDC';
+  } else { $('lev').textContent = '–'; $('margin').textContent = '–'; }
 }
+function clearOutputs2() { ['expLoss', 'notional', 'lev', 'margin'].forEach(id => $(id).textContent = '–'); }
+
+['entry', 'sl', 'tp', 'risk', 'portfolio'].forEach(id => $(id).addEventListener('input', () => calc()));
+$('coin').addEventListener('change', () => { coinTouched = true; calc(); });
+
+// Click an output to copy its value
+function copyOf(boxId, valId) {
+  $(boxId).addEventListener('click', () => {
+    const t = $(valId).textContent;
+    if (t === '–') return;
+    const raw = t.replace(/,/g, '');
+    (navigator.clipboard ? navigator.clipboard.writeText(raw) : Promise.reject()).catch(() => {
+      const ta = document.createElement('textarea'); ta.value = raw; document.body.appendChild(ta);
+      ta.select(); document.execCommand('copy'); ta.remove();
+    });
+    const toast = $('toast'); toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 900);
+  });
+}
+copyOf('sizeBox', 'size');
+copyOf('adjBox', 'adj');
+
+// Copy the I3:Q3 row (tab-separated, so it pastes into nine cells)
+const pad = n => String(n).padStart(2, '0');
+function nowStamp() {               // m/d/yyyy h:mm:ss, like the sheet's NOW() cell
+  const d = new Date();
+  return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()} ${d.getHours()}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+function showToast(msg) {
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1100);
+}
+$('coinText').addEventListener('input', () => {
+  coinTextTouched = $('coinText').value.trim() !== '';
+  if (!coinTextTouched) $('coinText').value = $('coin').value;   // cleared -> back to automatic
+});
+$('copyRow').addEventListener('click', () => {
+  if (!state) return;
+  const sep = ',';
+  const fx = (v, d) => v == null ? '' : v.toFixed(d).replace('.', sep);   // fixed decimals
+  const gen = v => v == null ? '' : String(v).replace('.', sep);          // "General"
+  const row = [
+    nowStamp(),                         // I  current time
+    $('coinText').value,                // J  coin
+    $('system').value,                  // K  system
+    fx(state.amount, 5),                // L  amount of coin
+    gen(state.risk),                    // M  risk
+    fx(state.exp, 2),                   // N  expected loss
+    gen(state.portfolio),               // O  portfolio
+    gen(state.sl),                      // P  stop loss price
+    fx(state.adj, 2)                    // Q  adjusted stop loss
+  ].join('\t');
+  (navigator.clipboard ? navigator.clipboard.writeText(row) : Promise.reject()).catch(() => {
+    const ta = document.createElement('textarea'); ta.value = row; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy'); ta.remove();
+  });
+  showToast('Row copied');
+});
+// System dropdown (still a normal text field you can overwrite)
+const sysMenu = $('sysMenu'), sysToggle = $('sysToggle');
+const setMenu = open => { sysMenu.hidden = !open; sysToggle.setAttribute('aria-expanded', open); };
+sysToggle.addEventListener('click', e => { e.stopPropagation(); setMenu(sysMenu.hidden); });
+sysMenu.querySelectorAll('li').forEach(li => {
+  const pick = () => { $('system').value = li.textContent; setMenu(false); $('system').focus(); };
+  li.addEventListener('click', pick);
+  li.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } if (e.key === 'Escape') setMenu(false); });
+});
+document.addEventListener('click', e => { if (!$('sysBox').contains(e.target)) setMenu(false); });
+$('system').addEventListener('keydown', e => { if (e.key === 'Escape') setMenu(false); });
+
+const _calc = calc;
+calc = function () { _calc(); $('copyRow').disabled = !state; };
 
 calc();
 </script>
